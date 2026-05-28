@@ -1,0 +1,46 @@
+workflows:
+  ios-merchant-app:
+    name: ElyasX Merchant - iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      flutter: 3.24.0
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: "com.eliasx.eliasXMerchant"
+        APP_NAME: "ElyasX التجار"
+        API_URL: "https://YOUR-SERVER.com/api/v1"
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+
+      - name: Build iOS (no code signing - for Sideloadly)
+        script: |
+          flutter build ios --release \
+            --dart-define=API_URL=$API_URL \
+            --no-codesign
+
+      - name: Package IPA
+        script: |
+          mkdir -p build/ios/ipa
+          cd build/ios/Release-iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r ../ipa/ElyasX-Merchant.ipa Payload
+          echo "IPA created successfully"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      email:
+        recipients:
+          - abdalqader268@gmail.com
