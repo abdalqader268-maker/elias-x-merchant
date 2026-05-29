@@ -22,6 +22,17 @@ workflows:
           cd ios
           pod install
 
+      - name: Disable Xcode code signing
+        script: |
+          cd ios
+          sed -i '' \
+            -e 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' \
+            -e 's/CODE_SIGN_IDENTITY = "iPhone Developer"/CODE_SIGN_IDENTITY = ""/g' \
+            -e 's/CODE_SIGN_IDENTITY = "Apple Development"/CODE_SIGN_IDENTITY = ""/g' \
+            Runner.xcodeproj/project.pbxproj
+          sed -i '' '/DEVELOPMENT_TEAM/d' Runner.xcodeproj/project.pbxproj
+          echo "Code signing disabled in Xcode project"
+
       - name: Build iOS (no code signing - for Sideloadly)
         script: |
           flutter build ios --release \
